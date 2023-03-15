@@ -3,6 +3,7 @@ use std::fmt;
 use std::future::Future;
 use std::time::Duration;
 
+use http::Uri;
 use serde::Serialize;
 #[cfg(feature = "json")]
 use serde_json;
@@ -22,6 +23,8 @@ use http::{request::Parts, Request as HttpRequest, Version};
 pub struct Request {
     method: Method,
     url: Url,
+    /// Optionally allow directly using URI. Prefer this if it is provided.
+    uri: Option<Uri>,
     headers: HeaderMap,
     body: Option<Body>,
     timeout: Option<Duration>,
@@ -44,6 +47,7 @@ impl Request {
         Request {
             method,
             url,
+            uri: None,
             headers: HeaderMap::new(),
             body: None,
             timeout: None,
@@ -73,6 +77,13 @@ impl Request {
     #[inline]
     pub fn url_mut(&mut self) -> &mut Url {
         &mut self.url
+    }
+
+    
+    /// Get a mutable reference to the uri.
+    #[inline]
+    pub fn uri_mut(&mut self) -> &mut Option<Uri> {
+        &mut self.uri
     }
 
     /// Get the headers.
@@ -144,6 +155,7 @@ impl Request {
     ) -> (
         Method,
         Url,
+    Option<Uri>,
         HeaderMap,
         Option<Body>,
         Option<Duration>,
@@ -152,6 +164,7 @@ impl Request {
         (
             self.method,
             self.url,
+            self.uri,
             self.headers,
             self.body,
             self.timeout,
@@ -612,6 +625,7 @@ where
         Ok(Request {
             method,
             url,
+            uri: None,
             headers,
             body: Some(body.into()),
             timeout: None,

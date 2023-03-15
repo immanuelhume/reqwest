@@ -217,6 +217,7 @@ macro_rules! if_hyper {
     )*}
 }
 
+use http::Uri;
 pub use http::header;
 pub use http::Method;
 pub use http::{StatusCode, Version};
@@ -261,6 +262,14 @@ pub use self::response::ResponseBuilderExt;
 /// - redirect limit was exhausted
 pub async fn get<T: IntoUrl>(url: T) -> crate::Result<Response> {
     Client::builder().build()?.get(url).send().await
+}
+
+/// Same as `get`, but with a uri instead of url.
+pub async fn get2(uri: Uri) -> crate::Result<Response> {
+    let cli =Client::builder().build()?;
+    let mut req = Request::new(Method::GET, Url::parse(&uri.to_string()).unwrap());
+    let _ = req.uri_mut().insert(uri);
+    cli.execute(req).await
 }
 
 fn _assert_impls() {

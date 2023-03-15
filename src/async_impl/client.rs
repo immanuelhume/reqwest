@@ -1505,7 +1505,7 @@ impl Client {
     }
 
     pub(super) fn execute_request(&self, req: Request) -> Pending {
-        let (method, url, mut headers, body, timeout, version) = req.pieces();
+        let (method, url, uri, mut headers, body, timeout, version) = req.pieces();
         if url.scheme() != "http" && url.scheme() != "https" {
             return Pending::new_err(error::url_bad_scheme(url));
         }
@@ -1541,7 +1541,8 @@ impl Client {
             }
         }
 
-        let uri = expect_uri(&url);
+        // NOTE (jy): this is a dumb trick to sneak in a raw URI.
+        let uri = uri.unwrap_or_else(|| expect_uri(&url));
 
         let (reusable, body) = match body {
             Some(body) => {
